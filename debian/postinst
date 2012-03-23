@@ -1,11 +1,14 @@
 #!/bin/sh
 set -e
 
-VER="0.1.7a"
+PKG="statgen"
+VER="0.1.4"
+PKG_DIR=/usr/lib/${PKG}${VER}
 
 if [ "$1" = "configure" ]; then
-    if [ ! -e /usr/bin/samtools-hybrid ]; then
-        for filename in samtools-hybrid razip blast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl md5sum-lite md5fa maq2sam-short maq2sam-long wgsim; do
+    if [ ! -e /usr/bin/verifyBamID ]; then
+        for pathname in ${PKG_DIR}/bin/*; do
+            filename=`basename $pathname`
             update-alternatives --install /usr/bin/${filename} ${filename} /usr/bin/${filename}${VER} 1
         done
     fi

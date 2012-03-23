@@ -1,5 +1,26 @@
 #!/usr/bin/make -f
 
+PKG="statgen0.1.4"
+VER="0.1.4"
+DEB_DIR=debian/${PKG}
+PWD=`pwd`
+DEB_INST_DIR=${PWD}/${DEB_DIR}/usr/lib/${PKG}/bin
+
+# otherwise the build step will use -g -O2 instead of what the Makefiles want
+unexport CFLAGS   # otherwise the build step will use -g -O2 instead of what the Makefiles want
+
+
 %:
 	dh $@
 
+#build:
+#	make
+
+override_dh_auto_install:
+	mkdir -p ${DEB_DIR}/usr/lib/${PKG}/bin
+	mkdir -p ${DEB_DIR}/usr/bin
+	make install INSTALLDIR=${DEB_INST_DIR}
+	for filename in ${DEB_INST_DIR}/*; do \
+		file=`basename $${filename}`; \
+		echo "export PATH=/usr/lib/${PKG}/bin:\$$PATH; exec $$file" > ${DEB_DIR}/usr/bin/$${file}${VER}; \
+	done
