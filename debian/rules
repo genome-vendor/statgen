@@ -19,7 +19,7 @@ unexport CFLAGS
 
 override_dh_auto_install:
 	mkdir -p $(DEB_DIR)/usr/bin $(DEB_DIR)$(PKG_LIB_DIR)/bin
-	make install INSTALLDIR="$(DEB_DIR)$(PKG_LIB_DIR)/bin"
+	make install INSTALLDIR="$$(realpath $(DEB_DIR)$(PKG_LIB_DIR)/bin)"
 	for BIN in $(BIN_LIST); do \
 		BASE_BIN=$$(basename $${BIN});\
 		install -m 755 $${BIN} $(DEB_DIR)$(PKG_LIB_DIR)/bin/$${BASE_BIN};\
