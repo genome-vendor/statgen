@@ -1,26 +1,30 @@
 #!/usr/bin/make -f
 
-PKG="statgen0.1.4"
-VER="0.1.4"
-DEB_DIR=debian/${PKG}
-PWD=`pwd`
-DEB_INST_DIR=${PWD}/${DEB_DIR}/usr/lib/${PKG}/bin
+PRG=statgen
+VER=0.1.4
+BIN_LIST=$$(find bin/ -executable -type f)
+PKG=$(PRG)$(VER)
+DEB_DIR=debian/$(PKG)
+PKG_LIB_DIR=/usr/lib/$(PKG)
+BIN_WRAPPER=\
+'\#!/bin/sh\n'\
+'export PATH=$(PKG_LIB_DIR)/bin:$$PATH\n'\
+"exec $${BASE_BIN}" '"$$@"'
 
 # otherwise the build step will use -g -O2 instead of what the Makefiles want
-unexport CFLAGS   # otherwise the build step will use -g -O2 instead of what the Makefiles want
-
+unexport CFLAGS
 
 %:
 	dh $@
 
-#build:
-#	make
-
 override_dh_auto_install:
-	mkdir -p ${DEB_DIR}/usr/lib/${PKG}/bin
-	mkdir -p ${DEB_DIR}/usr/bin
-	make install INSTALLDIR=${DEB_INST_DIR}
-	for filename in ${DEB_INST_DIR}/*; do \
-		file=`basename $${filename}`; \
-		echo "export PATH=/usr/lib/${PKG}/bin:\$$PATH; exec $$file" > ${DEB_DIR}/usr/bin/$${file}${VER}; \
+	mkdir -p $(DEB_DIR)/usr/bin $(DEB_DIR)$(PKG_LIB_DIR)/bin
+	make install INSTALLDIR="$(DEB_DIR)$(PKG_LIB_DIR)/bin"
+	for BIN in $(BIN_LIST); do \
+		BASE_BIN=$$(basename $${BIN});\
+		install -m 755 $${BIN} $(DEB_DIR)$(PKG_LIB_DIR)/bin/$${BASE_BIN};\
+		echo $(BIN_WRAPPER) | sed 's/^ *//' > $(DEB_DIR)/usr/bin/$${BASE_BIN}$(VER);\
 	done
+
+override_dh_strip:
+	echo "Do not create a *dbgsym*.ddeb package."
